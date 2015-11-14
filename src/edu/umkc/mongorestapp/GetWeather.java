@@ -124,7 +124,7 @@ public class GetWeather {
 	 * }
 	 * Data comes from the Weather Underground REST API
 	 */
-	private JSONObject getSingleWeather(String lat, String lon, int travelTime) throws IOException {
+	protected JSONObject getSingleWeather(String lat, String lon, int travelTime) throws IOException {
 		JSONObject returnObj = new JSONObject(); //parsed results to be returned to calling method
 		
 		String url = "http://api.wunderground.com/api/84d3abefc608dbdd/conditions/q/" + lat + "," + lon + ".json";

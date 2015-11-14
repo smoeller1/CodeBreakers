@@ -108,7 +108,8 @@ public class UserServlet extends HttpServlet {
 					lockUser(returnObj, users, postData);
 					break;
 				case "10":
-					getDirections(returnObj, users, postData);
+					JSONObject fullRoute = getDirections(returnObj, users, postData);
+					getWeather(returnObj, fullRoute);
 					break;
 				default:
 					returnObj.put("Status", 2);
@@ -124,6 +125,15 @@ public class UserServlet extends HttpServlet {
 		response.setHeader("Access-Control-Allow-Headers", "x-requested-with");
 		response.setHeader("Access-Control-Max-Age",  "86400");
 		response.getWriter().append(returnObj.toString());
+	}
+
+	private void getWeather(JSONObject returnObj, JSONObject fullRoute) {
+		GetWeather weather = new GetWeather(fullRoute);
+		try {
+			weather.parseDirections(returnObj);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void lockUser(JSONObject returnObj, DBCollection users, JSONObject postData) {
@@ -152,27 +162,29 @@ public class UserServlet extends HttpServlet {
 		returnObj.put("StatusReason", "Account locked");
 	}
 
-	private void getDirections(JSONObject returnObj, DBCollection users, JSONObject postData) {
+	private JSONObject getDirections(JSONObject returnObj, DBCollection users, JSONObject postData) {
+		JSONObject fullRoute = new JSONObject();
 		if (postData.get("RouteStartAddress") == null) {
 			returnObj.put("Status", 0);
 			returnObj.put("StatusReason", "No starting address");
-			return;
+			return fullRoute;
 		}
 		if (postData.get("RouteEndAddress") == null) {
 			returnObj.put("Status",  0);
 			returnObj.put("StatusReason", "No ending address");
-			return;
+			return fullRoute;
 		}
 		GetDirections directions = new GetDirections(postData.get("RouteStartAddress").toString(), postData.get("RouteEndAddress").toString());
 		if (postData.get("WaypointAddress") != null) {
 			directions.setWaypoint(postData.get("WaypointAddress").toString());
 		}
 		try {
-			JSONObject routeMap = directions.getDirections();
+			JSONObject routeMap = directions.getDirections(fullRoute);
 			returnObj.put("Route", routeMap);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return fullRoute;
 	}
 
 	private void forgotPassword(JSONObject returnObj, DBCollection users, JSONObject postData) {

@@ -43,18 +43,43 @@ public class GetGoogleDirectionsTest {
 		setTestData();
 		GetGoogleDirections testObject = new GetGoogleDirections(start, end);
 		try {
-			JSONObject jsonResults = testObject.getDirections();
+			JSONObject fullResults = new JSONObject();
+			JSONObject jsonResults = testObject.getDirections(fullResults);
 			assertFalse(jsonResults.isEmpty());
+			assertFalse(fullResults.isEmpty());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		testObject.setWaypoint(way);
 		try {
-			JSONObject jsonResults = testObject.getDirections();
+			JSONObject fullResults = new JSONObject();
+			JSONObject jsonResults = testObject.getDirections(fullResults);
 			assertFalse(jsonResults.isEmpty());
+			assertFalse(fullResults.isEmpty());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	public void testAssignNodeGps() {
+		setTestData();
+		JSONObject leg = new JSONObject();
+		JSONObject startLocation = new JSONObject();
+		JSONObject returnResults = new JSONObject();
+		GetGoogleDirections testObject = new GetGoogleDirections(start, end);
+		int nodeNumber = 0;
+		startLocation.put("lat", 38.1234);
+		startLocation.put("lng", 91.234);
+		leg.put("start_location", startLocation);
+		testObject.assignNodeGps(leg, returnResults, nodeNumber);
+		//route->node0->start_location->lat/lng
+		assertTrue(returnResults.containsKey("route"));
+		JSONObject route = (JSONObject) returnResults.get("route");
+		assertTrue(route.containsKey("node0"));
+		JSONObject start_location = (JSONObject) route.get("node0");
+		assertTrue(start_location.containsKey("lat"));
+		assertEquals(start_location.get("lat").toString(), startLocation.get("lat").toString());
 	}
 
 	private void setTestData() {
