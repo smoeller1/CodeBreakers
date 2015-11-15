@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html ng-app="starter">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title>Driving Weather</title>
+
+      <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
+ 
+      <script src="js/ng-cordova.min.js"></script>
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+      <script src="js/angularfire.min.js"></script>
+      <script src="js/firebase.js"></script>
+
+    <!-- your app's js -->
+       <script src="js/geolocation.js"></script>
+  <script src="js/app.js"></script>
+  </head>
+  <body ng-controller="RegisterCtrl">
+
+    <ion-pane>
+      <ion-header-bar class="bar-dark">
+        <h1 class="title">Driving Weather</h1>
+      </ion-header-bar>
+      <ion-content>
+          <h2>Register</h2>
+          <label class="item item-input">
+              <span class="input-label">Username</span>
+              <input type="text" ng-model="username" placeholder="Username">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">Password</span>
+              <input type="password" ng-model="password" placeholder="Password">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">Repeat password</span>
+              <input type="password" ng-model="password2" placeholder="Password">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">First Name</span>
+              <input type="text" ng-model="fname" placeholder="First name">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">Last name</span>
+              <input type="text" ng-model="lname" placeholder="Last name">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">Email</span>
+              <input type="text" ng-model="email" placeholder="user@mail.com">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">Mobile number</span>
+              <input type="tel" ng-model="mobilenum" placeholder="816-555-1234">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">Home address</span>
+              <input type="text" ng-model="address" placeholder="123 My Street">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">City</span>
+              <input type="text" ng-model="city" placeholder="Anytown">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">State</span>
+              <input type="text" ng-model="state" placeholder="MO">
+          </label>
+          <label class="item item-input">
+              <span class="input-label">Country</span>
+              <input type="text" ng-model="country" placeholder="United States">
+          </label>
+          <a id="btn" class="btn btn-primary" ng-click="registerUser(username, password, password2, fname, lname, email, mobilenum, address, city, state, country)">Register</a><br>
+          <div>* = required fields</div>
+
+      </ion-content>
+        <ion-footer-bar class="bar-dark">
+            Register - <a href="index.html">Home</a>
+    </ion-footer-bar>
+    </ion-pane>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html ng-app="starter">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title>Driving Weather</title>
+
+      <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
+ 
+      <script src="js/ng-cordova.min.js"></script>
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+      <script src="js/angularfire.min.js"></script>
+      <script src="js/firebase.js"></script>
+
+    <!-- your app's js -->
+       <script src="js/geolocation.js"></script>
+  <script src="js/app.js"></script>
+  </head>
+  <body ng-controller="TodoCtrl">
+
+    <ion-pane>
+      <ion-header-bar class="bar-dark">
+        <h1 class="title">Driving Weather</h1>
+      </ion-header-bar>
+      <ion-content>
+          <label class="item item-input">
+              <span class="input-label">Start</span>
+              <input type="text" ng-model="startLoc" placeholder="Start location: UMKC">
+          </label>
+        <label class="item item-input">
+              <span class="input-label">End</span>
+              <input type="text" ng-model="endLoc" placeholder="End location: UM-Columbia">
+          </label>
+          <a id="btn" class="btn btn-primary" ng-click="calcRoute(startLoc, endLoc)">Go</a><br>
+          <span data-ng-bind="routingError"></span><br>
+          
+          <table>
+              <tr>
+                  <td>
+                    <div id="map" data-tap-disabled="true"></div>
+                  </td>
+                  <td>
+                      <ul>
+                          <li ng-repeat="x in weather">{{ Math.round(x.travelTime/60) + " minutes from now: " + x.temp_c + " " + x.icon }}</li>
+                      </ul>
+                  </td>
+              </tr>
+          </table>
+          
+          <div>
+              <span data-ng-bind="sourceTemp"></span>
+          </div>
+      </ion-content>
+        <ion-footer-bar class="bar-dark">
+            Map - <a href="index.html">Home</a>
+    </ion-footer-bar>
+    </ion-pane>
+  </body>
+</html>
