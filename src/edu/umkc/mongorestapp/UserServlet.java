@@ -108,8 +108,7 @@ public class UserServlet extends HttpServlet {
 					lockUser(returnObj, users, postData);
 					break;
 				case "10":
-					JSONObject fullRoute = getDirections(returnObj, users, postData);
-					getWeather(returnObj, fullRoute);
+					getDirections(returnObj, users, postData);
 					break;
 				default:
 					returnObj.put("Status", 2);
@@ -128,6 +127,16 @@ public class UserServlet extends HttpServlet {
 	}
 
 	private void getWeather(JSONObject returnObj, JSONObject fullRoute) {
+		if (fullRoute == null) {
+			returnObj.put("Status", 0);
+			returnObj.put("StatusReason", "Driving route information not available");
+			return;
+		}
+		if (fullRoute.isEmpty()) {
+			returnObj.put("Status", 0);
+			returnObj.put("StatusReason", "Driving route information not available");
+			return;
+		}
 		GetWeather weather = new GetWeather(fullRoute);
 		try {
 			weather.parseDirections(returnObj);
@@ -162,17 +171,17 @@ public class UserServlet extends HttpServlet {
 		returnObj.put("StatusReason", "Account locked");
 	}
 
-	private JSONObject getDirections(JSONObject returnObj, DBCollection users, JSONObject postData) {
+	private void getDirections(JSONObject returnObj, DBCollection users, JSONObject postData) {
 		JSONObject fullRoute = new JSONObject();
 		if (postData.get("RouteStartAddress") == null) {
 			returnObj.put("Status", 0);
 			returnObj.put("StatusReason", "No starting address");
-			return fullRoute;
+			return;
 		}
 		if (postData.get("RouteEndAddress") == null) {
 			returnObj.put("Status",  0);
 			returnObj.put("StatusReason", "No ending address");
-			return fullRoute;
+			return;
 		}
 		GetDirections directions = new GetDirections(postData.get("RouteStartAddress").toString(), postData.get("RouteEndAddress").toString());
 		if (postData.get("WaypointAddress") != null) {
@@ -180,11 +189,13 @@ public class UserServlet extends HttpServlet {
 		}
 		try {
 			JSONObject routeMap = directions.getDirections(fullRoute);
+			System.out.println("UserServlet: getDirections: fullRoute size: "+fullRoute.size());
 			returnObj.put("Route", routeMap);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return fullRoute;
+		System.out.println("UserServlet: getDirections: Calling getWeather with: "+returnObj.size()+" and "+fullRoute.size());
+		getWeather(returnObj, fullRoute);
 	}
 
 	private void forgotPassword(JSONObject returnObj, DBCollection users, JSONObject postData) {

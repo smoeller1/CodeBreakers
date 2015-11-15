@@ -43,6 +43,7 @@ public class GetDirections {
 			googleRoute.setWaypoint(waypoint);
 		}
 		JSONObject googleDirections = googleRoute.getDirections(fullRoute);
+		System.out.println("GetDirections: getDirections: fullRoute size: "+fullRoute.size());
 		
 		//TODO once we add more APIs, we will have to compare to find the best route
 		

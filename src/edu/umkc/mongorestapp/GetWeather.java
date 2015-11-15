@@ -47,10 +47,10 @@ public class GetWeather {
 	 * ]
 	 */
 	public void parseDirections(JSONObject returnObj) throws IOException {
-		JSONObject[] weatherInfo = new JSONObject[numberOfLegs + 1];
+		JSONArray weatherInfo = new JSONArray();
 		int weatherInfoC = 0;
 		
-		int totalTime = Integer.parseInt((String) directions.get("TotalTime"));
+		int totalTime = Integer.parseInt((String) directions.get("TotalTime").toString());
 		
 		int legTime = totalTime / numberOfLegs;
 		if (legTime < 1) {
@@ -58,59 +58,68 @@ public class GetWeather {
 			legTime = 1;
 		}
 		
-		JSONObject routes = (JSONObject) directions.get("routes");
-		JSONArray legsArr = (JSONArray) routes.get("legs");
+		JSONArray routesArr = (JSONArray) directions.get("routes");
+		java.util.ListIterator routesArrIter = routesArr.listIterator();
 		int secondsSinceLast = 0;
+		while (routesArrIter.hasNext()) {
+			JSONObject thisRoute = (JSONObject) routesArrIter.next();
+			JSONArray legsArr = (JSONArray) thisRoute.get("legs");
 		
-		/* Walk through all of the legs of the trip. Each leg can contain multiple smaller steps,
-		 * and there can be multiple legs, particularly on longer cross country trips */
-		for (int i = 0; i < legsArr.size(); i++) {
-			JSONObject tmpObj = (JSONObject) legsArr.get(i);
-			JSONArray stepsArr = (JSONArray) tmpObj.get("steps");
+			/* Walk through all of the legs of the trip. Each leg can contain multiple smaller steps,
+			 * and there can be multiple legs, particularly on longer cross country trips */
+			for (int i = 0; i < legsArr.size(); i++) {
+				JSONObject tmpObj = (JSONObject) legsArr.get(i);
+				JSONArray stepsArr = (JSONArray) tmpObj.get("steps");
 			
-			/* Now to walk through all of the sub steps that make up this leg, since we will frequently
-			 * want weather information for points within a single leg */
-			for (int j = 0; j < stepsArr.size(); j++) {
-				JSONObject thisStep = (JSONObject) stepsArr.get(j);
-				JSONObject duration = (JSONObject) thisStep.get("duration");
-				int dValue = Integer.parseInt((String) duration.get("value"));	
-				JSONObject startLoc = (JSONObject) thisStep.get("start_location");
-				float startLat = Float.parseFloat(startLoc.get("lat").toString());
-				float startLng = Float.parseFloat(startLoc.get("lng").toString());
-				JSONObject endLoc = (JSONObject) thisStep.get("end_location");
-				float endLat = Float.parseFloat(endLoc.get("lat").toString());
-				float endLng = Float.parseFloat(endLoc.get("lng").toString());
+				/* Now to walk through all of the sub steps that make up this leg, since we will frequently
+				 * want weather information for points within a single leg */
+				for (int j = 0; j < stepsArr.size(); j++) {
+					JSONObject thisStep = (JSONObject) stepsArr.get(j);
+					JSONObject duration = (JSONObject) thisStep.get("duration");
+					System.out.println("GetWeather: parseDirections: duration size: "+duration.size());
+					int dValue = Integer.parseInt((String) duration.get("value").toString());	
+					JSONObject startLoc = (JSONObject) thisStep.get("start_location");
+					float startLat = Float.parseFloat(startLoc.get("lat").toString());
+					float startLng = Float.parseFloat(startLoc.get("lng").toString());
+					JSONObject endLoc = (JSONObject) thisStep.get("end_location");
+					float endLat = Float.parseFloat(endLoc.get("lat").toString());
+					float endLng = Float.parseFloat(endLoc.get("lng").toString());
 				
-				/* Check if this is the first time through, and if so save the starting point weather */
-				if (weatherInfoC == 0) {
-					weatherInfo[weatherInfoC++] = getSingleWeather(startLoc.get("lat").toString(), startLoc.get("lng").toString(), weatherInfoC * legTime);
-				}
+					/* Check if this is the first time through, and if so save the starting point weather */
+					if (weatherInfoC == 0) {
+						JSONObject tmpSingleWeather = getSingleWeather(startLoc.get("lat").toString(), startLoc.get("lng").toString(), weatherInfoC * legTime);
+						weatherInfo.add(tmpSingleWeather);
+						weatherInfoC++;
+					}
 				
-				/* Check if the duration of this leg will put us past our next update point */
-				while (dValue + secondsSinceLast > legTime) {
-					float ratioNeeded = ((float) (legTime - secondsSinceLast)) / (float) dValue;
-					String legLat = Float.toString((endLat - startLat) * ratioNeeded + startLat);
-					String legLng = Float.toString((endLng - startLng) * ratioNeeded + startLng);
-					weatherInfo[weatherInfoC++] = getSingleWeather(legLat, legLng, weatherInfoC * legTime);
+					/* Check if the duration of this leg will put us past our next update point */
+					while (dValue + secondsSinceLast > legTime) {
+						float ratioNeeded = ((float) (legTime - secondsSinceLast)) / (float) dValue;
+						String legLat = Float.toString((endLat - startLat) * ratioNeeded + startLat);
+						String legLng = Float.toString((endLng - startLng) * ratioNeeded + startLng);
+						weatherInfoC++;
+						JSONObject tmpSingleWeather = getSingleWeather(legLat, legLng, weatherInfoC * legTime);
+						weatherInfo.add(tmpSingleWeather);
 					
-					/* Now to see if this leg.step in the path needs to be subdivided into even more weather points */
-					if (secondsSinceLast + dValue >= legTime) {
-						dValue -= legTime - secondsSinceLast;
-						if (dValue < legTime) {
-							/* This was the last subdivided point in this leg.step */
-							secondsSinceLast = dValue;
-							dValue = 0;
+						/* Now to see if this leg.step in the path needs to be subdivided into even more weather points */
+						if (secondsSinceLast + dValue >= legTime) {
+							dValue -= legTime - secondsSinceLast;
+							if (dValue < legTime) {
+								/* This was the last subdivided point in this leg.step */
+								secondsSinceLast = dValue;
+								dValue = 0;
+							} else {
+								/* There are even more subdivided points that we need to get out of this leg.step */
+								secondsSinceLast = 0;
+							}
 						} else {
-							/* There are even more subdivided points that we need to get out of this leg.step */
-							secondsSinceLast = 0;
-						}
-					} else {
-						dValue -= legTime - secondsSinceLast;
-						secondsSinceLast = (secondsSinceLast + dValue) % legTime;
-					} //if
-				} //while
-			} //for steps
-		} //for legs
+							dValue -= legTime - secondsSinceLast;
+							secondsSinceLast = (secondsSinceLast + dValue) % legTime;
+						} //if
+					} //while
+				} //for steps
+			} //for legs
+		} //routesArr while
 		returnObj.put("WeatherInfo", weatherInfo);
 	}
 	
@@ -128,6 +137,7 @@ public class GetWeather {
 		JSONObject returnObj = new JSONObject(); //parsed results to be returned to calling method
 		
 		String url = "http://api.wunderground.com/api/84d3abefc608dbdd/conditions/q/" + lat + "," + lon + ".json";
+		System.out.println("GetWeather: getSingleWeather: Calling url: "+url);
 		
 		URL wUnderground = new URL(url);
 		URLConnection wuc = wUnderground.openConnection();
@@ -135,9 +145,10 @@ public class GetWeather {
 		String inputData;
 		String jsonData = "";
 		while ((inputData = in.readLine()) != null) {
-			jsonData.concat(inputData);
+			jsonData += inputData;
 		}
 		in.close();
+		System.out.println("GetWeather: getSingleWeather: Returned results: "+jsonData);
 		
 		JSONObject weatherResults = (JSONObject) JSON.parse(jsonData);
 		JSONObject currentObservation = (JSONObject) weatherResults.get("current_observation");
