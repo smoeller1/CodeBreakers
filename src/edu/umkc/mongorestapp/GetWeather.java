@@ -61,6 +61,11 @@ public class GetWeather {
 		JSONArray routesArr = (JSONArray) directions.get("routes");
 		java.util.ListIterator routesArrIter = routesArr.listIterator();
 		int secondsSinceLast = 0;
+		
+		//Save these with each loop, so that we can use the last one to get the last point
+		String lastLat = "";
+		String lastLng = "";
+		
 		while (routesArrIter.hasNext()) {
 			JSONObject thisRoute = (JSONObject) routesArrIter.next();
 			JSONArray legsArr = (JSONArray) thisRoute.get("legs");
@@ -84,10 +89,12 @@ public class GetWeather {
 					JSONObject endLoc = (JSONObject) thisStep.get("end_location");
 					float endLat = Float.parseFloat(endLoc.get("lat").toString());
 					float endLng = Float.parseFloat(endLoc.get("lng").toString());
+					lastLat = startLoc.get("lat").toString();
+					lastLng = startLoc.get("lng").toString();
 				
 					/* Check if this is the first time through, and if so save the starting point weather */
 					if (weatherInfoC == 0) {
-						JSONObject tmpSingleWeather = getSingleWeather(startLoc.get("lat").toString(), startLoc.get("lng").toString(), weatherInfoC * legTime);
+						JSONObject tmpSingleWeather = getSingleWeather(lastLat, lastLng, weatherInfoC * legTime);
 						weatherInfo.add(tmpSingleWeather);
 						weatherInfoC++;
 					}
@@ -97,9 +104,9 @@ public class GetWeather {
 						float ratioNeeded = ((float) (legTime - secondsSinceLast)) / (float) dValue;
 						String legLat = Float.toString((endLat - startLat) * ratioNeeded + startLat);
 						String legLng = Float.toString((endLng - startLng) * ratioNeeded + startLng);
-						weatherInfoC++;
 						JSONObject tmpSingleWeather = getSingleWeather(legLat, legLng, weatherInfoC * legTime);
 						weatherInfo.add(tmpSingleWeather);
+						weatherInfoC++;
 					
 						/* Now to see if this leg.step in the path needs to be subdivided into even more weather points */
 						if (secondsSinceLast + dValue >= legTime) {
@@ -120,6 +127,11 @@ public class GetWeather {
 				} //for steps
 			} //for legs
 		} //routesArr while
+		
+		//Handle the weather for the last point now
+		JSONObject tmpSingleWeather = getSingleWeather(lastLat, lastLng, weatherInfoC * legTime);
+		weatherInfo.add(tmpSingleWeather);
+		
 		returnObj.put("WeatherInfo", weatherInfo);
 	}
 	
