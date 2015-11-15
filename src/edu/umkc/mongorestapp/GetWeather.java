@@ -21,7 +21,7 @@ public class GetWeather {
 	public GetWeather(JSONObject directions) {
 		super();
 		this.directions = directions;
-		numberOfLegs = 9; //default to 10 total legs (9 + starting point)
+		numberOfLegs = 4; //default to 5 total legs (4 + starting point), because of free WUnderground limitations
 	}
 	
 	public GetWeather(JSONObject directions, int numberOfLegs) {
