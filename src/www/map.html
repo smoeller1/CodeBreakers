@@ -44,19 +44,10 @@
           </label>
           <a id="btn" class="btn btn-primary" ng-click="calcRoute(startLoc, endLoc)">Go</a><br>
           <span data-ng-bind="routingError"></span><br>
-          
-          <table>
-              <tr>
-                  <td>
-                    <div id="map" data-tap-disabled="true"></div>
-                  </td>
-                  <td>
-                      <ul>
+          <ul>
                           <li ng-repeat="x in weather">{{ Math.round(x.travelTime/60) + " minutes from now: " + x.temp_c + " " + x.icon }}</li>
                       </ul>
-                  </td>
-              </tr>
-          </table>
+          <div id="map" data-tap-disabled="true"></div>
           
           <div>
               <span data-ng-bind="sourceTemp"></span>
