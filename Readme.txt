@@ -9,6 +9,8 @@ AngularJS front end is saved under src/www
 
 Java Servlet back end is saved under src/edu/umkc/mongorestapp
 
+Presentation: https://docs.google.com/presentation/d/1hRYqt7jNA9IOpdnBjHlBu6g3jr57EC8kxiWv17fUwTE/edit?usp=sharing
+
 Credits:
 Mongolab.com - user account database
 Bluemix.com - cloud provder running the Java Servlets
